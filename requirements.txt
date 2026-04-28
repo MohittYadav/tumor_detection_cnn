@@ -1,0 +1,11 @@
+tensorflow>=2.16.1 #for deep learning model
+opencv-python-headless #to handle images/process images
+numpy==1.26.4 #for numerical operations
+pillow #to handle images/process images
+huggingface_hub #for downloading machine learning models from huggingface hub
+fastapi #for building API
+uvicorn #for running API
+python-multipart #for handling file uploads
+httpx #for http requests
+setuptools #for packaging python libraries, modules and packages
+pydantic #data validation
