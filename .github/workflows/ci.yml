@@ -4,10 +4,14 @@ on:
   push:
     branches: ["main"]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+env:
+  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
+  GKE_ZONE: ${{ secrets.GKE_ZONE }}
+  IMAGE: us-central1-docker.pkg.dev/tumor-detect-494616/my-repo/mlops-app
 
+jobs:
+  test:
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -25,3 +29,43 @@ jobs:
     - name: Run pipeline test
       run: |
         echo "CI working successfully!"
+        # pytest (Uncomment when tests are ready)
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+    - name: Build the Docker image
+      run: |
+        docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+
+    - name: Push the Docker image
+      run: |
+        docker push $IMAGE:${{ github.sha }}
+        docker push $IMAGE:latest
+
+    - name: Setup GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location: ${{ env.GKE_ZONE }}
+
+    - name: Deploy to GKE
+      run: |
+        kubectl apply -f kubernetes-deployment.yaml
+        kubectl rollout restart deployment/mlops-app

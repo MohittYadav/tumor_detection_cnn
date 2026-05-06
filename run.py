@@ -3,7 +3,8 @@ run.py
 ──────
 Entry point for the OncoScan AI FastAPI server.
 
-    run>python run.py               # launches on http://127.0.0.1:8000
+Usage:
+    python run.py               # starts on http://127.0.0.1:8000
 """
 # check
 
@@ -17,7 +18,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-import uvicorn
+import uvicorn 
 
 if __name__ == "__main__":
     # Ensure absolute imports (e.g. `backend.config`) resolve correctly
